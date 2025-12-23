@@ -16,13 +16,33 @@ for (i = 1; i <= 5; i++) {
   onClickButtonDown(i);
 }
 
-function updateOnClickButtonNum(num) {
-  elevatorBtns[num - 1].addEventListener("click", async () => {
-    moveTo(num);
-  });
-}
+let curFloor = 1;
+let elevatorState = "IDLE";
 const upward = [];
 const downward = [];
+function updateOnClickButtonNum(num) {
+  elevatorBtns[num - 1].addEventListener("click", async () => {
+    if (num > curFloor) {
+      if (!upward.includes(num)) {
+        upward.push(num);
+        upward.sort();
+        if (elevatorState == "IDLE") {
+          elevatorState = "UPWARD";
+          await moveByStep();
+        }
+      }
+    } else if (num < curFloor) {
+      if (!downward.includes(num)) {
+        downward.push(num);
+        downward.sort().reverse();
+        if (elevatorState == "IDLE") {
+          elevatorState = "DOWNWARD";
+          await moveByStep();
+        }
+      }
+    }
+  });
+}
 function onClickButtonUp(num) {
   elevatorUpBtns[num - 1].addEventListener("click", async () => {
     if (!upward.includes(num)) {
@@ -48,8 +68,6 @@ function onClickButtonDown(num) {
   });
 }
 
-let curFloor = 1;
-let elevatorState = "IDLE";
 async function moveTo(floorToMove) {
   if (floorToMove > curFloor) {
     while (curFloor < floorToMove) {
@@ -90,6 +108,7 @@ async function moveByStep() {
   }
   moveByStep();
 }
+
 function getNextDir() {
   if (elevatorState == "UPWARD") {
     if (upward.length > 0) {
