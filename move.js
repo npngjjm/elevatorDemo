@@ -18,125 +18,113 @@ for (i = 1; i <= 5; i++) {
 
 let curFloor = 1;
 let elevatorState = "IDLE";
-let upward = [];
-let upward_below = [];
-let downward = [];
-let downward_above = [];
+const upward = [false, false, false, false, false];
+const downward = [false, false, false, false, false];
+let highest = -1;
+let lowest = 10;
+
 function updateOnClickButtonNum(num) {
   elevatorBtns[num - 1].addEventListener("click", async () => {
+    if (num > highest) highest = num;
+    if (num < lowest) lowest = num;
     if (num > curFloor) {
-      if (!upward.includes(num)) {
-        upward.push(num);
-        upward.sort();
-        if (elevatorState == "IDLE") {
-          elevatorState = "UPWARD";
-          await moveByStep();
-        }
+      upward[curFloor - 1] = true;
+      if (elevatorState == "IDLE") {
+        elevatorState = "UPWARD";
+        await moveByStep();
       }
     } else if (num < curFloor) {
-      if (!downward.includes(num)) {
-        downward.push(num);
-        downward.sort().reverse();
-        if (elevatorState == "IDLE") {
-          elevatorState = "DOWNWARD";
-          await moveByStep();
-        }
+      downward[curFloor - 1] = true;
+      if (elevatorState == "IDLE") {
+        elevatorState = "DOWNWARD";
+        await moveByStep();
       }
     }
   });
 }
 function onClickButtonUp(num) {
   elevatorUpBtns[num - 1].addEventListener("click", async () => {
-    if (curFloor > num) {
-      if (!upward_below.includes(num)) {
-        upward_below.push(num);
-        upward_below.sort();
-        if (elevatorState == "IDLE") {
-          elevatorState = "UPWARD";
-          await moveByStep();
-        }
-      }
-    } else if (curFloor < num) {
-      if (!upward.includes(num)) {
-        upward.push(num);
-        upward.sort();
-        if (elevatorState == "IDLE") {
-          elevatorState = "UPWARD";
-          await moveByStep();
-        }
-      }
+    upward[num - 1] = true;
+    if (elevatorState == "IDLE") {
+      elevatorState = "UPWARD";
+      await moveByStep();
     }
   });
 }
 function onClickButtonDown(num) {
   elevatorDownBtns[num - 1].addEventListener("click", async () => {
-    if (curFloor > num) {
-      if (!downward.includes(num)) {
-        downward.push(num);
-        downward.sort().reverse();
-        if (elevatorState == "IDLE") {
-          elevatorState = "DOWNWARD";
-          await moveByStep();
-        }
-      }
-    } else if (curFloor < num) {
-      if (!downward.includes(num)) {
-        downward_above.push(num);
-        downward_above.sort().reverse();
-        if (elevatorState == "IDLE") {
-          elevatorState = "DOWNWARD";
-          await moveByStep();
-        }
-      }
+    downward[num - 1] = true;
+    if (elevatorState == "IDLE") {
+      elevatorState = "DOWNWARD";
+      await moveByStep();
     }
   });
 }
 
+function setElevatorState() {
+  if (elevatorState == "UPWARD") {
+    if (isThereUpAbove()) {
+      elevatorState = "UPWARD";
+    } else if (isThereDownAbove()) {
+      elevatorState = "UPWARD";
+    } else if (isThereDownBelow()) {
+      elevatorState = "DOWNWARD";
+    } else if (isThereUpBelow()) {
+      elevatorState = "DOWNWARD";
+    } else {
+      elevatorState = "IDLE";
+    }
+  } else if (elevatorState == "DOWNWARD") {
+    if (isThereDownBelow()) {
+      elevatorState = "DOWNWARD";
+    } else if (isThereUpBelow()) {
+      elevatorState = "DOWNWARD";
+    } else if (isThereUpAbove()) {
+      elevatorState = "UPWARD";
+    } else if (isThereDownAbove()) {
+      elevatorState = "UPWARD";
+    } else {
+      elevatorState = "IDLE";
+    }
+  }
+}
+
 async function moveByStep() {
-  const dir = getNextDir();
-  if (dir == "UP") {
+  setElevatorState();
+  if (elevatorState == "UPWARD") {
     await moveUp();
-  } else if (dir == "DOWN") {
+  } else if (elevatorState == "DOWNWARD") {
     await moveDown();
-  } else if (dir == "NONE") {
+  } else if (elevatorState == "IDLE") {
     console.log(elevatorState);
     return;
   }
   moveByStep();
 }
 
-function getNextDir() {
-  if (elevatorState == "UPWARD") {
-    if (upward.length > 0) {
-      return "UP";
-    } else {
-      if (downward.length > 0) {
-        elevatorState = "DOWNWARD";
-        return "DOWN";
-      } else if (upward_below.length > 0) {
-        elevatorState = "DOWNWARD";
-        return "DOWN";
-      } else {
-        elevatorState = "IDLE";
-        return "NONE";
-      }
-    }
-  } else if (elevatorState == "DOWNWARD") {
-    if (downward.length > 0) {
-      return "DOWN";
-    } else {
-      if (upward.length > 0) {
-        elevatorState = "UPWARD";
-        return "UP";
-      } else if (downward_above.length > 0) {
-        elevatorState = "UPWARD";
-        return "UP";
-      } else {
-        elevatorState = "IDLE";
-        return "NONE";
-      }
-    }
+function isThereUpAbove() {
+  for (i = 4; i >= curFloor; i--) {
+    if (upward[i]) return true;
   }
+  return false;
+}
+function isThereDownAbove() {
+  for (i = 4; i >= curFloor; i--) {
+    if (downward[i]) return true;
+  }
+  return false;
+}
+function isThereUpBelow() {
+  for (i = 0; i < curFloor - 1; i++) {
+    if (upward[i]) return true;
+  }
+  return false;
+}
+function isThereDownBelow() {
+  for (i = 0; i < curFloor - 1; i++) {
+    if (downward[i]) return true;
+  }
+  return false;
 }
 
 async function moveUp() {
@@ -144,8 +132,11 @@ async function moveUp() {
     setTimeout(() => {
       curFloor++;
       console.log(curFloor);
-      if (curFloor == upward[0]) console.log("arrived", upward.shift());
-      elevator.style.bottom = `${70 + curFloor * 200}px`;
+      if (upward[curFloor - 1]) {
+        console.log("arrived", curFloor);
+        upward[curFloor - 1] = false;
+      }
+      elevator.style.bottom = `${curFloor * 200}px`;
       resolve();
     }, 2000);
   });
@@ -155,8 +146,11 @@ async function moveDown() {
     setTimeout(() => {
       curFloor--;
       console.log(curFloor);
-      if (curFloor == downward[0]) console.log("arrived", downward.shift());
-      elevator.style.bottom = `${70 + curFloor * 200}px`;
+      if (downward[curFloor - 1]) {
+        console.log("arrived", curFloor);
+        downward[curFloor - 1] = false;
+      }
+      elevator.style.bottom = `${curFloor * 200}px`;
       resolve();
     }, 2000);
   });

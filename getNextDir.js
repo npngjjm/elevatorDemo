@@ -2,7 +2,7 @@ const upward = [0, 0, 0, 0, 0];
 const downward = [0, 0, 0, 0, 0];
 function setElevatorState() {
   if (elevatorState == "UPWARD") {
-    if (isThereUpAbove() == TRUE) {
+    if (isThereUpAbove()) {
       elevatorState = "UPWARD";
     } else if (isThereDownAbove()) {
       elevatorState = "UPWARD";

@@ -1,5 +1,6 @@
 .contatiner {
-  position: relative;
+  position: absolute;
+  height: 1000px;
   display: flex;
 }
 .floor {
@@ -14,8 +15,8 @@
 }
 
 .elevator {
-  position: absolute;
-  bottom: 270px;
+  position: relative;
+  bottom: 200px;
   /* bottom: 1070px; */
   left: 55px;
   display: flex;
