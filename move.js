@@ -112,8 +112,6 @@ function getNextDir() {
     } else {
       if (downward.length > 0) {
         elevatorState = "DOWNWARD";
-        upward = [...upward, ...upward_below].sort();
-        upward_below = [];
         return "DOWN";
       } else if (upward_below.length > 0) {
         elevatorState = "DOWNWARD";
@@ -129,8 +127,6 @@ function getNextDir() {
     } else {
       if (upward.length > 0) {
         elevatorState = "UPWARD";
-        downward = [...downward, ...downward_above].sort();
-        downward_above = [];
         return "UP";
       } else if (downward_above.length > 0) {
         elevatorState = "UPWARD";
@@ -142,6 +138,7 @@ function getNextDir() {
     }
   }
 }
+
 async function moveUp() {
   await new Promise((resolve, reject) => {
     setTimeout(() => {
