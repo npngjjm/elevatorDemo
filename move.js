@@ -18,8 +18,10 @@ for (i = 1; i <= 5; i++) {
 
 let curFloor = 1;
 let elevatorState = "IDLE";
-const upward = [];
-const downward = [];
+let upward = [];
+let upward_below = [];
+let downward = [];
+let downward_above = [];
 function updateOnClickButtonNum(num) {
   elevatorBtns[num - 1].addEventListener("click", async () => {
     if (num > curFloor) {
@@ -45,55 +47,49 @@ function updateOnClickButtonNum(num) {
 }
 function onClickButtonUp(num) {
   elevatorUpBtns[num - 1].addEventListener("click", async () => {
-    if (!upward.includes(num)) {
-      upward.push(num);
-      upward.sort();
-      if (elevatorState == "IDLE") {
-        elevatorState = "UPWARD";
-        await moveByStep();
+    if (curFloor > num) {
+      if (!upward_below.includes(num)) {
+        upward_below.push(num);
+        upward_below.sort();
+        if (elevatorState == "IDLE") {
+          elevatorState = "UPWARD";
+          await moveByStep();
+        }
+      }
+    } else if (curFloor < num) {
+      if (!upward.includes(num)) {
+        upward.push(num);
+        upward.sort();
+        if (elevatorState == "IDLE") {
+          elevatorState = "UPWARD";
+          await moveByStep();
+        }
       }
     }
   });
 }
 function onClickButtonDown(num) {
   elevatorDownBtns[num - 1].addEventListener("click", async () => {
-    if (!downward.includes(num)) {
-      downward.push(num);
-      downward.sort().reverse();
-      if (elevatorState == "IDLE") {
-        elevatorState = "DOWNWARD";
-        await moveByStep();
+    if (curFloor > num) {
+      if (!downward.includes(num)) {
+        downward.push(num);
+        downward.sort().reverse();
+        if (elevatorState == "IDLE") {
+          elevatorState = "DOWNWARD";
+          await moveByStep();
+        }
+      }
+    } else if (curFloor < num) {
+      if (!downward.includes(num)) {
+        downward_above.push(num);
+        downward_above.sort().reverse();
+        if (elevatorState == "IDLE") {
+          elevatorState = "DOWNWARD";
+          await moveByStep();
+        }
       }
     }
   });
-}
-
-async function moveTo(floorToMove) {
-  if (floorToMove > curFloor) {
-    while (curFloor < floorToMove) {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          curFloor++;
-          console.log(curFloor);
-          elevator.style.bottom = `${70 + curFloor * 200}px`;
-          resolve();
-        }, 1000);
-      });
-    }
-    console.log("arrived");
-  } else if (floorToMove < curFloor) {
-    while (curFloor > floorToMove) {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          curFloor--;
-          console.log(curFloor);
-          elevator.style.bottom = `${70 + curFloor * 200}px`;
-          resolve();
-        }, 1000);
-      });
-    }
-    console.log("arrived");
-  }
 }
 
 async function moveByStep() {
@@ -113,22 +109,36 @@ function getNextDir() {
   if (elevatorState == "UPWARD") {
     if (upward.length > 0) {
       return "UP";
-    } else if (downward.length > 0) {
-      elevatorState = "DOWNWARD";
-      return "DOWN";
     } else {
-      elevatorState = "IDLE";
-      return "NONE";
+      if (downward.length > 0) {
+        elevatorState = "DOWNWARD";
+        upward = [...upward, ...upward_below].sort();
+        upward_below = [];
+        return "DOWN";
+      } else if (upward_below.length > 0) {
+        elevatorState = "DOWNWARD";
+        return "DOWN";
+      } else {
+        elevatorState = "IDLE";
+        return "NONE";
+      }
     }
   } else if (elevatorState == "DOWNWARD") {
     if (downward.length > 0) {
       return "DOWN";
-    } else if (upward.length > 0) {
-      elevatorState = "UPWARD";
-      return "UP";
     } else {
-      elevatorState = "IDLE";
-      return "NONE";
+      if (upward.length > 0) {
+        elevatorState = "UPWARD";
+        downward = [...downward, ...downward_above].sort();
+        downward_above = [];
+        return "UP";
+      } else if (downward_above.length > 0) {
+        elevatorState = "UPWARD";
+        return "UP";
+      } else {
+        elevatorState = "IDLE";
+        return "NONE";
+      }
     }
   }
 }
