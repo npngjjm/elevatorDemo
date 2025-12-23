@@ -13,6 +13,7 @@ const elevatorDownBtns = elevatorBtnsList.map((num) => {
 for (i = 1; i <= 5; i++) {
   updateOnClickButtonNum(i);
   onClickButtonUp(i);
+  onClickButtonDown(i);
 }
 
 function updateOnClickButtonNum(num) {
@@ -21,6 +22,7 @@ function updateOnClickButtonNum(num) {
   });
 }
 const upward = [];
+const downward = [];
 function onClickButtonUp(num) {
   elevatorUpBtns[num - 1].addEventListener("click", async () => {
     if (!upward.includes(num)) {
@@ -28,6 +30,18 @@ function onClickButtonUp(num) {
       upward.sort();
       if (elevatorState == "IDLE") {
         elevatorState = "UPWARD";
+        await moveByStep();
+      }
+    }
+  });
+}
+function onClickButtonDown(num) {
+  elevatorDownBtns[num - 1].addEventListener("click", async () => {
+    if (!downward.includes(num)) {
+      downward.push(num);
+      downward.sort().reverse();
+      if (elevatorState == "IDLE") {
+        elevatorState = "DOWNWARD";
         await moveByStep();
       }
     }
@@ -68,11 +82,36 @@ async function moveByStep() {
   const dir = getNextDir();
   if (dir == "UP") {
     await moveUp();
-    if (upward.length > 0) await moveByStep();
-  } else if (dir == "DOWN") moveDown();
+  } else if (dir == "DOWN") {
+    await moveDown();
+  } else if (dir == "NONE") {
+    console.log(elevatorState);
+    return;
+  }
+  moveByStep();
 }
 function getNextDir() {
-  return "UP";
+  if (elevatorState == "UPWARD") {
+    if (upward.length > 0) {
+      return "UP";
+    } else if (downward.length > 0) {
+      elevatorState = "DOWNWARD";
+      return "DOWN";
+    } else {
+      elevatorState = "IDLE";
+      return "NONE";
+    }
+  } else if (elevatorState == "DOWNWARD") {
+    if (downward.length > 0) {
+      return "DOWN";
+    } else if (upward.length > 0) {
+      elevatorState = "UPWARD";
+      return "UP";
+    } else {
+      elevatorState = "IDLE";
+      return "NONE";
+    }
+  }
 }
 async function moveUp() {
   await new Promise((resolve, reject) => {
@@ -90,6 +129,7 @@ async function moveDown() {
     setTimeout(() => {
       curFloor--;
       console.log(curFloor);
+      if (curFloor == downward[0]) console.log("arrived", downward.shift());
       elevator.style.bottom = `${70 + curFloor * 200}px`;
       resolve();
     }, 2000);
