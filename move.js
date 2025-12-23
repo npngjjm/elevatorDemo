@@ -20,21 +20,17 @@ let curFloor = 1;
 let elevatorState = "IDLE";
 const upward = [false, false, false, false, false];
 const downward = [false, false, false, false, false];
-let highest = -1;
-let lowest = 10;
 
 function updateOnClickButtonNum(num) {
   elevatorBtns[num - 1].addEventListener("click", async () => {
-    if (num > highest) highest = num;
-    if (num < lowest) lowest = num;
     if (num > curFloor) {
-      upward[curFloor - 1] = true;
+      upward[num - 1] = true;
       if (elevatorState == "IDLE") {
         elevatorState = "UPWARD";
         await moveByStep();
       }
     } else if (num < curFloor) {
-      downward[curFloor - 1] = true;
+      downward[num - 1] = true;
       if (elevatorState == "IDLE") {
         elevatorState = "DOWNWARD";
         await moveByStep();
@@ -63,25 +59,25 @@ function onClickButtonDown(num) {
 
 function setElevatorState() {
   if (elevatorState == "UPWARD") {
-    if (isThereUpAbove()) {
+    if (isThereUpAbove(curFloor)) {
       elevatorState = "UPWARD";
-    } else if (isThereDownAbove()) {
+    } else if (isThereDownAbove(curFloor)) {
       elevatorState = "UPWARD";
-    } else if (isThereDownBelow()) {
+    } else if (isThereDownBelow(curFloor)) {
       elevatorState = "DOWNWARD";
-    } else if (isThereUpBelow()) {
+    } else if (isThereUpBelow(curFloor)) {
       elevatorState = "DOWNWARD";
     } else {
       elevatorState = "IDLE";
     }
   } else if (elevatorState == "DOWNWARD") {
-    if (isThereDownBelow()) {
+    if (isThereDownBelow(curFloor)) {
       elevatorState = "DOWNWARD";
-    } else if (isThereUpBelow()) {
+    } else if (isThereUpBelow(curFloor)) {
       elevatorState = "DOWNWARD";
-    } else if (isThereUpAbove()) {
+    } else if (isThereUpAbove(curFloor)) {
       elevatorState = "UPWARD";
-    } else if (isThereDownAbove()) {
+    } else if (isThereDownAbove(curFloor)) {
       elevatorState = "UPWARD";
     } else {
       elevatorState = "IDLE";
@@ -91,6 +87,7 @@ function setElevatorState() {
 
 async function moveByStep() {
   setElevatorState();
+
   if (elevatorState == "UPWARD") {
     await moveUp();
   } else if (elevatorState == "DOWNWARD") {
@@ -102,26 +99,26 @@ async function moveByStep() {
   moveByStep();
 }
 
-function isThereUpAbove() {
-  for (i = 4; i >= curFloor; i--) {
+function isThereUpAbove(cur) {
+  for (i = 4; i >= cur; i--) {
     if (upward[i]) return true;
   }
   return false;
 }
-function isThereDownAbove() {
-  for (i = 4; i >= curFloor; i--) {
+function isThereDownAbove(cur) {
+  for (i = 4; i >= cur; i--) {
     if (downward[i]) return true;
   }
   return false;
 }
-function isThereUpBelow() {
-  for (i = 0; i < curFloor - 1; i++) {
+function isThereUpBelow(cur) {
+  for (i = 0; i < cur - 1; i++) {
     if (upward[i]) return true;
   }
   return false;
 }
-function isThereDownBelow() {
-  for (i = 0; i < curFloor - 1; i++) {
+function isThereDownBelow(cur) {
+  for (i = 0; i < cur - 1; i++) {
     if (downward[i]) return true;
   }
   return false;
@@ -135,6 +132,12 @@ async function moveUp() {
       if (upward[curFloor - 1]) {
         console.log("arrived", curFloor);
         upward[curFloor - 1] = false;
+      } else if (
+        !(isThereUpAbove(curFloor) || isThereDownAbove(curFloor)) &&
+        downward[curFloor - 1]
+      ) {
+        console.log("arrived", curFloor);
+        downward[curFloor - 1] = false;
       }
       elevator.style.bottom = `${curFloor * 200}px`;
       resolve();
@@ -149,6 +152,12 @@ async function moveDown() {
       if (downward[curFloor - 1]) {
         console.log("arrived", curFloor);
         downward[curFloor - 1] = false;
+      } else if (
+        !(isThereUpBelow(curFloor) || isThereDownBelow(curFloor)) &&
+        upward[curFloor - 1]
+      ) {
+        console.log("arrived", curFloor);
+        upward[curFloor - 1] = false;
       }
       elevator.style.bottom = `${curFloor * 200}px`;
       resolve();
