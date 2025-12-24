@@ -59,11 +59,11 @@ function onClickButtonDown(num) {
 
 function setElevatorState() {
   if (elevatorState == "UPWARD") {
-    if (isThereUpAbove(curFloor)) {
+    if (isThereUpAbove(curFloor) || isThereUpHere(curFloor)) {
       elevatorState = "UPWARD";
     } else if (isThereDownAbove(curFloor)) {
       elevatorState = "UPWARD";
-    } else if (isThereDownBelow(curFloor)) {
+    } else if (isThereDownBelow(curFloor) || isThereDownHere(curFloor)) {
       elevatorState = "DOWNWARD";
     } else if (isThereUpBelow(curFloor)) {
       elevatorState = "DOWNWARD";
@@ -71,11 +71,11 @@ function setElevatorState() {
       elevatorState = "IDLE";
     }
   } else if (elevatorState == "DOWNWARD") {
-    if (isThereDownBelow(curFloor)) {
+    if (isThereDownBelow(curFloor) || isThereDownHere(curFloor)) {
       elevatorState = "DOWNWARD";
     } else if (isThereUpBelow(curFloor)) {
       elevatorState = "DOWNWARD";
-    } else if (isThereUpAbove(curFloor)) {
+    } else if (isThereUpAbove(curFloor) || isThereUpHere(curFloor)) {
       elevatorState = "UPWARD";
     } else if (isThereDownAbove(curFloor)) {
       elevatorState = "UPWARD";
@@ -123,69 +123,101 @@ function isThereDownBelow(cur) {
   }
   return false;
 }
+function isThereUpHere(cur) {
+  if (upward[cur - 1]) return true;
+  return false;
+}
+function isThereDownHere(cur) {
+  if (downward[cur - 1]) return true;
+  return false;
+}
 
 async function moveUp() {
-  await new Promise((resolve, reject) => {
-    setTimeout(async () => {
-      curFloor++;
-      console.log(curFloor);
-      let isArrived = false;
-      if (upward[curFloor - 1]) {
-        console.log("arrived", curFloor);
-        isArrived = true;
-        upward[curFloor - 1] = false;
-      } else if (
-        !(isThereUpAbove(curFloor) || isThereDownAbove(curFloor)) &&
-        downward[curFloor - 1]
-      ) {
-        console.log("arrived", curFloor);
-        isArrived = true;
-        downward[curFloor - 1] = false;
-      }
-      elevator.style.bottom = `${curFloor * 200}px`;
-
-      if (isArrived) {
-        elevator.style.borderColor = "green";
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            elevator.style.borderColor = "black";
-            resolve();
-          }, 1000);
-        });
-      }
+  await new Promise(async (resolve, reject) => {
+    if (upward[curFloor - 1]) {
+      upward[curFloor - 1] = false;
+      elevator.style.borderColor = "green";
+      console.log("arrvied", curFloor);
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          elevator.style.borderColor = "black";
+          resolve();
+        }, 1000);
+      });
       resolve();
-    }, 2000);
+    } else
+      setTimeout(async () => {
+        curFloor++;
+        console.log(curFloor);
+        let isArrived = false;
+        if (upward[curFloor - 1]) {
+          console.log("arrived", curFloor);
+          isArrived = true;
+          upward[curFloor - 1] = false;
+        } else if (
+          !(isThereUpAbove(curFloor) || isThereDownAbove(curFloor)) &&
+          downward[curFloor - 1]
+        ) {
+          console.log("arrived", curFloor);
+          isArrived = true;
+          downward[curFloor - 1] = false;
+        }
+        elevator.style.bottom = `${curFloor * 200}px`;
+
+        if (isArrived) {
+          elevator.style.borderColor = "green";
+          await new Promise((resolve, reject) => {
+            setTimeout(() => {
+              elevator.style.borderColor = "black";
+              resolve();
+            }, 1000);
+          });
+        }
+        resolve();
+      }, 2000);
   });
 }
 async function moveDown() {
-  await new Promise((resolve, reject) => {
-    setTimeout(async () => {
-      curFloor--;
-      console.log(curFloor);
-      let isArrived = false;
-      if (downward[curFloor - 1]) {
-        console.log("arrived", curFloor);
-        isArrived = true;
-        downward[curFloor - 1] = false;
-      } else if (
-        !(isThereUpBelow(curFloor) || isThereDownBelow(curFloor)) &&
-        upward[curFloor - 1]
-      ) {
-        console.log("arrived", curFloor);
-        isArrived = true;
-        upward[curFloor - 1] = false;
-      }
-      elevator.style.bottom = `${curFloor * 200}px`;
-      if (isArrived) {
-        elevator.style.borderColor = "green";
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            elevator.style.borderColor = "black";
-            resolve();
-          }, 1000);
-        });
-      }
+  await new Promise(async (resolve, reject) => {
+    if (downward[curFloor - 1]) {
+      downward[curFloor - 1] = false;
+      elevator.style.borderColor = "green";
+      console.log("arrvied", curFloor);
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          elevator.style.borderColor = "black";
+          resolve();
+        }, 1000);
+      });
       resolve();
-    }, 2000);
+    } else
+      setTimeout(async () => {
+        curFloor--;
+        console.log(curFloor);
+        let isArrived = false;
+        if (downward[curFloor - 1]) {
+          console.log("arrived", curFloor);
+          isArrived = true;
+          downward[curFloor - 1] = false;
+        } else if (
+          !(isThereUpBelow(curFloor) || isThereDownBelow(curFloor)) &&
+          upward[curFloor - 1]
+        ) {
+          console.log("arrived", curFloor);
+          isArrived = true;
+          upward[curFloor - 1] = false;
+        }
+        elevator.style.bottom = `${curFloor * 200}px`;
+        if (isArrived) {
+          elevator.style.borderColor = "green";
+          await new Promise((resolve, reject) => {
+            setTimeout(() => {
+              elevator.style.borderColor = "black";
+              resolve();
+            }, 1000);
+          });
+        }
+        resolve();
+      }, 2000);
   });
 }
