@@ -1,3 +1,8 @@
+.body {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
 .contatiner {
   position: absolute;
   height: 1000px;
@@ -39,6 +44,10 @@
   flex-direction: column;
 }
 
+.btnContainer {
+  display: flex;
+}
+
 .btnUp {
   position: relative;
   display: block;
@@ -53,4 +62,11 @@
 
 .btnNum {
   margin: 5px;
+}
+
+.indicate {
+  font-size: 30px;
+  position: absolute;
+  top: 0;
+  left: 400px;
 }

@@ -9,7 +9,8 @@ const elevatorUpBtns = elevatorBtnsList.map((num) => {
 const elevatorDownBtns = elevatorBtnsList.map((num) => {
   return document.querySelector(`#floor_${num} .btnDown`);
 });
-
+const directionIndicator = document.querySelector(".direction");
+const currentFloorIndicator = document.querySelector(".curFloor");
 for (i = 1; i <= 5; i++) {
   updateOnClickButtonNum(i);
   onClickButtonUp(i);
@@ -66,7 +67,6 @@ function onClickButtonDown(num) {
     }
   });
 }
-
 function setElevatorState() {
   if (elevatorState == "UPWARD") {
     if (
@@ -105,6 +105,7 @@ function setElevatorState() {
 
 async function moveByStep() {
   setElevatorState();
+  updateElevatorDirection();
 
   if (elevatorState == "UPWARD") {
     await moveUp();
@@ -166,6 +167,7 @@ async function moveUp() {
     } else
       setTimeout(async () => {
         curFloor++;
+        updateElevatorFloor();
         console.log(curFloor);
         let isArrived = false;
         if (upward[curFloor - 1]) {
@@ -211,6 +213,7 @@ async function moveDown() {
     } else
       setTimeout(async () => {
         curFloor--;
+        updateElevatorFloor();
         console.log(curFloor);
         let isArrived = false;
         if (downward[curFloor - 1]) {
@@ -238,4 +241,11 @@ async function moveDown() {
         resolve();
       }, 2000);
   });
+}
+
+function updateElevatorDirection() {
+  directionIndicator.innerHTML = `${elevatorState}`;
+}
+function updateElevatorFloor() {
+  currentFloorIndicator.innerHTML = `${curFloor}`;
 }
