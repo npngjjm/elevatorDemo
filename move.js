@@ -35,6 +35,16 @@ function updateOnClickButtonNum(num) {
         elevatorState = "DOWNWARD";
         await moveByStep();
       }
+    } else if (num == curFloor) {
+      if (elevatorState == "UPWARD") {
+        upward[num - 1] = true;
+      } else if (elevatorState == "DOWNWARD") {
+        downward[num - 1] = true;
+      } else {
+        elevatorState = "UPWARD";
+        upward[num - 1] = true;
+        await moveByStep();
+      }
     }
   });
 }
@@ -59,25 +69,33 @@ function onClickButtonDown(num) {
 
 function setElevatorState() {
   if (elevatorState == "UPWARD") {
-    if (isThereUpAbove(curFloor) || isThereUpHere(curFloor)) {
+    if (
+      isThereUpAbove(curFloor) ||
+      isThereUpHere(curFloor) ||
+      isThereDownAbove(curFloor)
+    ) {
       elevatorState = "UPWARD";
-    } else if (isThereDownAbove(curFloor)) {
-      elevatorState = "UPWARD";
-    } else if (isThereDownBelow(curFloor) || isThereDownHere(curFloor)) {
-      elevatorState = "DOWNWARD";
-    } else if (isThereUpBelow(curFloor)) {
+    } else if (
+      isThereDownBelow(curFloor) ||
+      isThereDownHere(curFloor) ||
+      isThereUpBelow(curFloor)
+    ) {
       elevatorState = "DOWNWARD";
     } else {
       elevatorState = "IDLE";
     }
   } else if (elevatorState == "DOWNWARD") {
-    if (isThereDownBelow(curFloor) || isThereDownHere(curFloor)) {
+    if (
+      isThereDownBelow(curFloor) ||
+      isThereDownHere(curFloor) ||
+      isThereUpBelow(curFloor)
+    ) {
       elevatorState = "DOWNWARD";
-    } else if (isThereUpBelow(curFloor)) {
-      elevatorState = "DOWNWARD";
-    } else if (isThereUpAbove(curFloor) || isThereUpHere(curFloor)) {
-      elevatorState = "UPWARD";
-    } else if (isThereDownAbove(curFloor)) {
+    } else if (
+      isThereUpAbove(curFloor) ||
+      isThereUpHere(curFloor) ||
+      isThereDownAbove(curFloor)
+    ) {
       elevatorState = "UPWARD";
     } else {
       elevatorState = "IDLE";
